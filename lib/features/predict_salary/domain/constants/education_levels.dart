@@ -1,0 +1,1 @@
+final educationLevels = ["Bachelor's", "Master's", 'PhD'];
