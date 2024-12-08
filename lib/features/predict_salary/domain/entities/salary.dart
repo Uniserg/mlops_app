@@ -3,6 +3,7 @@ class Salary {
   String? gender;
   String? jobTitle;
   String? educationLevel;
+  String? location;
   double? yearsOfExperience;
   double? salary;
 
@@ -11,6 +12,7 @@ class Salary {
     this.gender,
     this.jobTitle,
     this.educationLevel,
+    this.location,
     this.yearsOfExperience,
     this.salary,
   });
@@ -22,6 +24,7 @@ class Salary {
       'jobTitle': jobTitle,
       'educationLevel': educationLevel,
       'yearsOfExperience': yearsOfExperience,
+      'location': location,
       'salary': salary,
     };
   }
@@ -37,6 +40,7 @@ class Salary {
       jobTitle: map['jobTitle'] ?? "",
       educationLevel: map['educationLevel'] ?? "",
       yearsOfExperience: (map['yearsOfExperience'] as num?)?.toDouble() ?? 0,
+      location: map['location'] ?? "",
       salary: (map['salary'] as num?)?.toDouble() ?? 0.0,
     );
 
@@ -46,12 +50,13 @@ class Salary {
       jobTitle: map['jobTitle'] ?? "",
       educationLevel: map['educationLevel'] ?? "",
       yearsOfExperience: (map['yearsOfExperience'] as num?)?.toDouble() ?? 0,
+      location: map['location'] ?? "",
       salary: (map['salary'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
   @override
   String toString() {
-    return 'Salary(age: $age, gender: $gender, jobTitle: $jobTitle, educationLevel: $educationLevel, yearsOfExperience: $yearsOfExperience, salary: $salary)';
+    return 'Salary(age: $age, gender: $gender, jobTitle: $jobTitle, educationLevel: $educationLevel, location: $location, yearsOfExperience: $yearsOfExperience, salary: $salary)';
   }
 }

@@ -1,10 +1,15 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:mlops_app/features/predict_salary/domain/constants/app_settings.dart';
 import 'package:mlops_app/features/predict_salary/domain/constants/education_levels.dart';
 import 'package:mlops_app/features/predict_salary/domain/constants/genders.dart';
 import 'package:mlops_app/features/predict_salary/domain/constants/jobs.dart';
+import 'package:mlops_app/features/predict_salary/domain/constants/locations.dart';
 import 'package:mlops_app/features/predict_salary/domain/entities/salary.dart';
+
+import 'package:http/http.dart' as http;
 
 int getDevisions(int min, int max) {
   return max - min + 1;
@@ -51,37 +56,48 @@ class _SalaryPredictPageState extends State<SalaryPredictPage> {
     );
   }
 
+
+  double mockSalary() {
+    final randomSalary = Random.secure().nextDouble() * 1000000;
+    return randomSalary;
+  }
+
+  Future<double> getSalaryFromServer() async {
+     showLoaderDialog(context);
+    final response = await http.post(
+      Uri.parse('$serverUrl/api/salary_predict'),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        'Content-Type': 'application/json',
+        'Accept': '*/*'
+      },
+      body: json.encode(salary.toJson()),
+    );
+    Navigator.pop(context);
+
+    double? salary_value;
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      salary_value = double.parse(data['salary']);
+    } else {
+      throw Exception(
+          'Неуспешный запрос ${response.statusCode}: ${response.reasonPhrase}');
+    }
+
+    if (salary_value == null) {
+      throw Exception(
+          'Неуспешный запрос ${response.statusCode}: ${response.reasonPhrase}');
+    }   
+    return salary_value; 
+  }
+
   void getPredictSalary(BuildContext context, Salary salary) async {
-    // showLoaderDialog(context);
-    // final response = await http.post(
-    //   Uri.parse('$lab1Url/get-salary'),
-    //   headers: {
-    //     "Access-Control-Allow-Origin": "*",
-    //     'Content-Type': 'application/json',
-    //     'Accept': '*/*'
-    //   },
-    //   body: salary.toJson(),
-    // );
-    // Navigator.pop(context);
-
-    // double? salary;
-
-    // if (response.statusCode == 200) {
-    //   final data = json.decode(response.body);
-    //   salary = double.parse(data['salary']);
-    // } else {
-    //   throw Exception(
-    //       'Неуспешный запрос ${response.statusCode}: ${response.reasonPhrase}');
-    // }
-
-    // if (salary == null) {
-    //   throw Exception(
-    //       'Неуспешный запрос ${response.statusCode}: ${response.reasonPhrase}');
-    // }
+    double salary_value = await getSalaryFromServer();
+    
     setState(() {
-
-      final randomSalary = Random.secure().nextDouble() * 1000000;
-      salary.salary = num.parse(randomSalary.toStringAsFixed(2)) as double?;
+      // final randomSalary = Random.secure().nextDouble() * 1000000;
+      salary.salary = num.parse(salary_value.toStringAsFixed(2)) as double?;
     });
   }
 
@@ -138,6 +154,27 @@ class _SalaryPredictPageState extends State<SalaryPredictPage> {
                         })
                   ],
                 ),
+                                TableRow(
+                  children: [
+                    const Text("Локация:"),
+                    DropdownButtonFormField(
+                        validator: (value) =>
+                            value != null ? null : requiredField,
+                        isExpanded: true,
+                        value: salary.location,
+                        items: locations
+                            .map((e) => DropdownMenuItem(
+                                  value: e,
+                                  child: Text(e),
+                                ))
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            salary.location = value;
+                          });
+                        })
+                  ],
+                ),
                 TableRow(
                   children: [
                     const Text("Профессия:"),
@@ -180,6 +217,7 @@ class _SalaryPredictPageState extends State<SalaryPredictPage> {
                         }),
                   ],
                 ),
+
                 TableRow(
                   children: [
                     const Text("Количество полных лет"),
